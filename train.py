@@ -259,7 +259,7 @@ if __name__ == "__main__":
             verbose=1
         ),
         ModelCheckpoint(
-            'best_gtsrb_model.h5',
+            'models/best_gtsrb_model.h5',
             monitor='val_accuracy',
             save_best_only=True,
             verbose=1

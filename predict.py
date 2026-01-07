@@ -139,7 +139,7 @@ def predict_top_classes(model, image_data, classes, top_n=5):
 
 if __name__ == "__main__":
     # Path to the trained model
-    model_path = 'best_gtsrb_model.h5'
+    model_path = 'models/best_gtsrb_model.h5'
 
     # Load the trained model
     try:

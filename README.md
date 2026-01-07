@@ -130,7 +130,10 @@ Test Data accuracy:  98.68566904196358
 
 ![Predict](./graphs/predict.png)
 
-**IMPORTANT:** adjust kaggle_base_path = '/kaggle/input/gtsrb-german-traffic-sign' before running predict.py
+**IMPORTANT:** adjust kaggle_base_path = '/kaggle/input/gtsrb-german-traffic-sign' before running predict.py.
+
+Alternatively, use the predict_with_input.py and enter the paths for the model and a file too analyse:
+![Predict](./graphs/predict_with_input.png)
 
 ## How to reproduce
 The model was trained and saved using Google Colab. If you want to reproduce the results, either:
@@ -145,8 +148,62 @@ Additionally, check the imports in the notebook.
 
 ## Model deployment
 ### Dependencies
+See the [requirements.txt](requirements.txt) to see packages that are required to run the model in Docker.
 
 ### Containerization
+See the [Dockerfile](Dockerfile).
+1. Create the necessary directories:
+```bash
+mkdir -p dataset models output
+```
+2. Build the Docker Image
+```bash
+docker build -t traffic-sign-recognition:latest .
+```
+3. Run the Container for training
+```bash
+docker build -t traffic-sign-recognition:latest .
+```
+4. Run the Container for prediction
+```bash
+docker run -it --rm \
+  -v $(pwd)/dataset:/app/dataset \
+  -v $(pwd)/models:/app/models \
+  -v $(pwd)/output:/app/output \
+  traffic-sign-recognition:latest python predict.py
+```
+You'll be prompted to enter:
 
+* Model path (e.g., /app/models/best_gtsrb_model.h5)
+* Image path(s) (e.g., /app/dataset/Test/00000.png)
 ### Cloud deployment
+The current model can be deployed to Google Cloud for prediction. Follow the steps.
+1. Install prerequisites
+```bash
+# Install Google Cloud SDK
+curl https://sdk.cloud.google.com | bash
+exec -l $SHELL
 
+# Login and set project
+gcloud auth login
+gcloud config set project YOUR_PROJECT_ID
+```
+2. Enable required APIs
+```bash
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com
+```
+3. Build and push to Google Container Registry
+```bash
+gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/traffic-sign-recognition
+```
+4. Deploy to Cloud Run
+```bash
+gcloud run deploy traffic-sign-api \
+  --image gcr.io/YOUR_PROJECT_ID/traffic-sign-recognition \
+  --platform managed \
+  --region us-central1 \
+  --memory 4Gi \
+  --cpu 2 \
+  --timeout 600 \
+  --allow-unauthenticated
+```
