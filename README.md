@@ -123,6 +123,12 @@ Test Data accuracy:  98.68566904196358
 * There seems to be a known bug for older versions of TF + ONNX. Unfortunately, Google Colab does not allow me update further: https://github.com/onnx/tensorflow-onnx/issues/2348. So I used a suggestion from ChatGPT to save the model in the ONNX format.
 
 ## Notebook to script
+* Running train.py
+![Train](./graphs/train.png)
+* Running predict.py
+![Predict](./graphs/predict.png)
+
+**IMPORTANT:** adjust kaggle_base_path = '/kaggle/input/gtsrb-german-traffic-sign' before running predict.py
 
 ## How to reproduce
 The model was trained and saved using Google Colab. If you want to reproduce the results, either:
