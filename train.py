@@ -1,5 +1,4 @@
 import os
-import cv2
 import kagglehub
 import numpy as np
 
@@ -9,9 +8,16 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCh
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
-# Function to load and preprocess GTSRB data
-def load_gtsrb_data(path, img_height=30, img_width=30,
-                    validation_split=0.3, shuffle=True, random_state=42):
+# Import shared utilities
+from utils import (
+    NUM_CLASSES,
+    IMG_HEIGHT,
+    IMG_WIDTH,
+    preprocess_image
+)
+
+
+def load_gtsrb_data(path, validation_split=0.3, shuffle=True, random_state=42):
     """
     Efficiently load and preprocess GTSRB training data.
 
@@ -19,10 +25,6 @@ def load_gtsrb_data(path, img_height=30, img_width=30,
     -----------
     path : str
         Path to the data directory
-    img_height : int
-        Target height for resized images
-    img_width : int
-        Target width for resized images
     validation_split : float
         Fraction of data to use for validation (0.0 to 1.0)
     shuffle : bool
@@ -32,7 +34,7 @@ def load_gtsrb_data(path, img_height=30, img_width=30,
 
     Returns:
     --------
-    X_train, X_val, y_train, y_val : numpy arrays
+    X_train, X_val, y_train, y_val, X_train_normalized, X_val_normalized : numpy arrays
         Training and validation data and labels (shuffled if shuffle=True)
     """
 
@@ -40,7 +42,7 @@ def load_gtsrb_data(path, img_height=30, img_width=30,
 
     # Get number of categories
     num_categories = len([d for d in os.listdir(train_path)
-                         if os.path.isdir(os.path.join(train_path, d))])
+                          if os.path.isdir(os.path.join(train_path, d))])
 
     print(f"Found {num_categories} categories")
 
@@ -50,12 +52,12 @@ def load_gtsrb_data(path, img_height=30, img_width=30,
         class_path = os.path.join(train_path, str(i))
         if os.path.exists(class_path):
             total_images += len([f for f in os.listdir(class_path)
-                               if f.lower().endswith(('.png'))])
+                                 if f.lower().endswith(('.png'))])
 
     print(f"Total images to load: {total_images}")
 
     # Pre-allocate arrays (much more efficient than list appending)
-    image_data = np.zeros((total_images, img_height, img_width, 3), dtype=np.uint8)
+    image_data = np.zeros((total_images, IMG_HEIGHT, IMG_WIDTH, 3), dtype=np.uint8)
     image_labels = np.zeros(total_images, dtype=np.int32)
 
     # Load images with progress bar
@@ -71,24 +73,17 @@ def load_gtsrb_data(path, img_height=30, img_width=30,
                 continue
 
             images = [f for f in os.listdir(class_path)
-                     if f.lower().endswith(('.png'))]
+                      if f.lower().endswith(('.png'))]
 
             for img_name in images:
                 img_path = os.path.join(class_path, img_name)
 
                 try:
-                    # Read image directly with cv2 (BGR format)
-                    image = cv2.imread(img_path)
+                    # Use shared preprocessing function
+                    processed_image = preprocess_image(img_path)
 
-                    if image is None:
-                        raise ValueError(f"Failed to load image")
-
-                    # Convert BGR to RGB
-                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-                    # Resize with better interpolation
-                    image_resized = cv2.resize(image, (img_width, img_height),
-                                              interpolation=cv2.INTER_AREA)
+                    # Convert back to uint8 for storage efficiency
+                    image_resized = (processed_image * 255).astype(np.uint8)
 
                     # Store in pre-allocated array
                     image_data[idx] = image_resized
@@ -117,7 +112,7 @@ def load_gtsrb_data(path, img_height=30, img_width=30,
     print(f"\nSuccessfully loaded: {len(image_data)} images")
     print(f"Data shape: {image_data.shape}")
     print(f"Labels shape: {image_labels.shape}")
-    print(f"Memory usage: {image_data.nbytes / (1024**2):.2f} MB")
+    print(f"Memory usage: {image_data.nbytes / (1024 ** 2):.2f} MB")
 
     # Shuffle data if requested (even without validation split)
     if shuffle and validation_split == 0:
@@ -133,7 +128,7 @@ def load_gtsrb_data(path, img_height=30, img_width=30,
             image_data, image_labels,
             test_size=validation_split,
             random_state=random_state,
-            shuffle=shuffle,  # Explicitly control shuffling
+            shuffle=shuffle,
             stratify=image_labels  # Maintains class distribution
         )
 
@@ -147,8 +142,12 @@ def load_gtsrb_data(path, img_height=30, img_width=30,
     else:
         return image_data, None, image_labels, None, None, None
 
-# Function to create CNN model
-def create_cnn_model(input_shape=(30, 30, 3), num_classes=43, learning_rate=0.001, drop_first=0.25, drop_second=0.5):
+
+def create_cnn_model(input_shape=(IMG_HEIGHT, IMG_WIDTH, 3),
+                     num_classes=NUM_CLASSES,
+                     learning_rate=0.001,
+                     drop_first=0.25,
+                     drop_second=0.5):
     """
     Create a CNN model for GTSRB traffic sign classification.
 
@@ -164,6 +163,12 @@ def create_cnn_model(input_shape=(30, 30, 3), num_classes=43, learning_rate=0.00
         Shape of input images (height, width, channels)
     num_classes : int
         Number of traffic sign classes (43 for GTSRB)
+    learning_rate : float
+        Learning rate for Adam optimizer
+    drop_first : float
+        Dropout rate for convolutional blocks
+    drop_second : float
+        Dropout rate for dense layers
 
     Returns:
     --------
@@ -221,6 +226,7 @@ def create_cnn_model(input_shape=(30, 30, 3), num_classes=43, learning_rate=0.00
 
     return model
 
+
 if __name__ == "__main__":
     # 1. Download the dataset
     print("Downloading dataset...")
@@ -233,17 +239,20 @@ if __name__ == "__main__":
 
     # 3. One-hot encode labels
     print("One-hot encoding labels...")
-    num_classes = 43 # GTSRB has 43 classes
-    y_train = keras.utils.to_categorical(y_train, num_classes)
-    y_val = keras.utils.to_categorical(y_val, num_classes)
+    y_train = keras.utils.to_categorical(y_train, NUM_CLASSES)
+    y_val = keras.utils.to_categorical(y_val, NUM_CLASSES)
 
     # 4. Create the model
     print("Creating CNN model...")
-    model = create_cnn_model(input_shape=(30, 30, 3), num_classes=num_classes)
+    model = create_cnn_model()
     model.summary()
 
     # 5. Define callbacks
     print("Setting up training callbacks...")
+
+    # Create models directory if it doesn't exist
+    os.makedirs('models', exist_ok=True)
+
     callbacks = [
         EarlyStopping(
             monitor='val_loss',
@@ -278,4 +287,4 @@ if __name__ == "__main__":
         verbose=1
     )
 
-    print("\nModel training complete! Best model saved to 'best_gtsrb_model.h5'")
+    print("\nModel training complete! Best model saved to 'models/best_gtsrb_model.h5'")

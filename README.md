@@ -132,7 +132,7 @@ Test Data accuracy:  98.68566904196358
 
 **IMPORTANT:** adjust kaggle_base_path = '/kaggle/input/gtsrb-german-traffic-sign' before running predict.py.
 
-Alternatively, use the predict_with_input.py and enter the paths for the model and a file too analyse:
+Alternatively, use the predict_with_input.py and enter the paths for the model and a file to analyse:
 ![Predict](./graphs/predict_with_input.png)
 
 ## How to reproduce
@@ -140,9 +140,9 @@ The model was trained and saved using Google Colab. If you want to reproduce the
 * open the notebook in Google Colab and follow the steps;
 
 OR
-* download the dataset from Kaggle using any of the ways provided on the website and adjust the path variable from the following code accordingly:
+* download the dataset from Kaggle using any of the ways provided on the website and adjust the path variable from predict.py accordingly:
 ```python
-path = kagglehub.dataset_download("meowmeowmeowmeowmeow/gtsrb-german-traffic-sign")
+kaggle_base_path = '/kaggle/input/gtsrb-german-traffic-sign'
 ```
 Additionally, check the imports in the notebook.
 
