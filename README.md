@@ -176,6 +176,37 @@ You'll be prompted to enter:
 
 * Model path (e.g., /app/models/best_gtsrb_model.h5)
 * Image path(s) (e.g., /app/dataset/Test/00000.png)
+
+### Running a local Streamlit app
+1. Check whether the Streamlit config exists here: .streamlit/config.toml. If not, create it:
+```toml
+[theme]
+primaryColor = "#FF4B4B"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#262730"
+font = "sans serif"
+
+[server]
+maxUploadSize = 200
+enableXsrfProtection = true
+enableCORS = false
+
+[browser]
+gatherUsageStats = false
+```
+2. Install requirements and run the app:
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run Streamlit app
+streamlit run app.py
+```
+3. Go to http://localhost:8501 in your browser.
+
+
+
 ### Cloud deployment
 The current model can be deployed to Google Cloud for prediction. Follow the steps.
 1. Install prerequisites
