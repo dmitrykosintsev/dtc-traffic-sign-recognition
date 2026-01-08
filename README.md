@@ -1,5 +1,5 @@
 # Traffic sign recognition using GTSRB and CNN
-This repository contains a capstone project completed for LM Zoomcamp 2025
+This repository contains a capstone project completed for LM Zoomcamp 2025. You can check the final result here: https://dtc-traffic-sign-recognition.streamlit.app/
 
 ## Problem description
 Traffic sign recognition and classification is an important problem for self-driving cars as it provides invaluable information for the vehicles to follow the rules and predict possible changes on the road. This projects aims to provide a model that can accurately recognise and classify road signs in over 40 classes. 
@@ -119,9 +119,6 @@ Running the model on the test dataset:
 Test Data accuracy:  98.68566904196358
 ```
 
-### Challenges
-* There seems to be a known bug for older versions of TF + ONNX. Unfortunately, Google Colab does not allow me update further: https://github.com/onnx/tensorflow-onnx/issues/2348. So I used a suggestion from ChatGPT to save the model in the ONNX format.
-
 ## Notebook to script
 * Running train.py:
 
@@ -206,8 +203,11 @@ streamlit run app.py
 3. Go to http://localhost:8501 in your browser.
 
 
-
 ### Cloud deployment
+#### Interactive version on Streamlit
+Go to https://dtc-traffic-sign-recognition.streamlit.app/
+
+#### Deploy Docker with CLI on Google Cloud
 The current model can be deployed to Google Cloud for prediction. Follow the steps.
 1. Install prerequisites
 ```bash
@@ -238,3 +238,7 @@ gcloud run deploy traffic-sign-api \
   --timeout 600 \
   --allow-unauthenticated
 ```
+
+## Challenges and learnings
+* There seems to be a known bug for older versions of TF + ONNX. Unfortunately, Google Colab does not allow me update further: https://github.com/onnx/tensorflow-onnx/issues/2348. So I used a suggestion from ChatGPT to save the model in the ONNX format.
+* Deploying models on Streamlit requires opencv-python-headless, not opencv-python

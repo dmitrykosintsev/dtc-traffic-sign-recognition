@@ -207,3 +207,4 @@ marimo/_lsp/
 __marimo__/
 /dataset/
 /.idea/dtc-traffic-sign-recognition.iml
+/structure.txt
