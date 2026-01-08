@@ -6,7 +6,7 @@ from PIL import Image
 from tensorflow import keras
 
 # Import shared utilities
-from utils import (
+from project_utils import (
     CLASSES,              # Traffic sign dictionary
     preprocess_image,     # Handles file paths
     predict_top_classes   # Makes predictions

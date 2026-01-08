@@ -9,7 +9,7 @@ from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
 # Import shared utilities
-from utils import (
+from project_utils import (
     NUM_CLASSES,
     IMG_HEIGHT,
     IMG_WIDTH,

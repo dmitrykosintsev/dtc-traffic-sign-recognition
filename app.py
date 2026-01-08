@@ -5,7 +5,7 @@ from tensorflow import keras
 import os
 
 # Import shared utilities
-from utils import (
+from project_utils import (
     CLASSES,  # Traffic sign classes dictionary
     NUM_CLASSES,  # Total number of classes (43)
     IMG_HEIGHT,  # Image height (30)
